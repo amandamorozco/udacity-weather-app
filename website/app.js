@@ -1,10 +1,11 @@
 /* Global Variables */
 
-let baseURL = "https://api.openweathermap.org/data/2.5/weather?q=";
-let apiKey = "&APPID=7d1deb7e68385fba8ab550bb9c3b2302";
+const baseURL = "https://api.openweathermap.org/data/2.5/weather?q=";
+const apiKey = "&APPID=7d1deb7e68385fba8ab550bb9c3b2302";
+const units = "&units=imperial";
 
 async function getWeather(zip) {
-  const response = await fetch(baseURL + zip + apiKey);
+  const response = await fetch(baseURL + zip + apiKey + units);
   return response.json();
 }
 
@@ -24,12 +25,12 @@ async function postData(path, data) {
 }
 
 function addEntry(temperature, date, userResponse) {
-  const dateElement = document.querySelector('#date');
-  dateElement.innerHTML = 'Date: ' + date;
-  const temperatureElement = document.querySelector('#temp');
-  temperatureElement.innerHTML = 'Temperature: ' + temperature;
-  const contentElement = document.querySelector('#content');
-  contentElement.innerHTML = 'Today I am Feeling: ' + userResponse;
+  const dateElement = document.querySelector("#date");
+  dateElement.innerHTML = "Date: " + date;
+  const temperatureElement = document.querySelector("#temp");
+  temperatureElement.innerHTML = "Temperature: " + temperature + " Fahrenheit";
+  const contentElement = document.querySelector("#content");
+  contentElement.innerHTML = "Today I am Feeling: " + userResponse;
 }
 
 document
@@ -40,16 +41,13 @@ document
       document.querySelector("#zip").value
     );
     let d = new Date();
-    let newDate = d.getMonth() + "." + d.getDate() + "." + d.getFullYear();
+    let newDate = d.getMonth() + 1 + "." + d.getDate() + "." + d.getFullYear();
     const feelings = document.querySelector("#feelings").value;
-    await postData("/project-data", {
+    const postDataResponse = await postData("/project-data", {
       temperature: weatherResponse.main.temp,
       date: newDate,
       userResponse: feelings
     });
-    addEntry(weatherResponse.main.temp, newDate, feelings)
+    const json = await postDataResponse.json();
+    addEntry(json.temperature, json.date, json.userResponse);
   });
-
-// Create a new date instance dynamically with JS
-let d = new Date();
-let newDate = d.getMonth() + "." + d.getDate() + "." + d.getFullYear();
