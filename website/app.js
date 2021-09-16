@@ -24,30 +24,37 @@ async function postData(path, data) {
   });
 }
 
-function addEntry(temperature, date, userResponse) {
-  const dateElement = document.querySelector("#date");
-  dateElement.innerHTML = "Date: " + date;
-  const temperatureElement = document.querySelector("#temp");
-  temperatureElement.innerHTML = "Temperature: " + temperature + " Fahrenheit";
-  const contentElement = document.querySelector("#content");
-  contentElement.innerHTML = "Today I am Feeling: " + userResponse;
+async function addEntry(temperature, date, userResponse) {
+  const response = await fetch("/project-data");
+  try {
+    const allData = await response.json();
+    const dateElement = document.querySelector("#date");
+    dateElement.innerHTML = "Date: " + allData.date;
+    const temperatureElement = document.querySelector("#temp");
+    temperatureElement.innerHTML =
+      "Temperature: " + allData.temperature + " Fahrenheit";
+    const contentElement = document.querySelector("#content");
+    contentElement.innerHTML = "Today I am Feeling: " + allData.userResponse;
+  } catch (error) {}
 }
 
 document
   .querySelector("#generate")
   .addEventListener("click", async function (event) {
     console.log(document.querySelector("#zip").value);
-    const weatherResponse = await getWeather(
-      document.querySelector("#zip").value
-    );
-    let d = new Date();
-    let newDate = d.getMonth() + 1 + "." + d.getDate() + "." + d.getFullYear();
-    const feelings = document.querySelector("#feelings").value;
-    const postDataResponse = await postData("/project-data", {
-      temperature: weatherResponse.main.temp,
-      date: newDate,
-      userResponse: feelings
-    });
-    const json = await postDataResponse.json();
-    addEntry(json.temperature, json.date, json.userResponse);
+    getWeather(document.querySelector("#zip").value)
+      .then((response) => {
+        let d = new Date();
+        let newDate =
+          d.getMonth() + 1 + "." + d.getDate() + "." + d.getFullYear();
+        const feelings = document.querySelector("#feelings").value;
+        return postData("/project-data", {
+          temperature: response.main.temp,
+          date: newDate,
+          userResponse: feelings
+        });
+      })
+      .then((response) => {
+        addEntry();
+      });
   });
